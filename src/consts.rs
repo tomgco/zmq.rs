@@ -55,7 +55,8 @@ impl Copy for SocketOption {}
 const HAUSNUMERO: int = 156384712;
 
 /// ØMQ errors.
-#[deriving(PartialEq, Show)]
+#[derive(PartialEq, Show)]
+
 pub enum ErrorCode {
     /// Invalid argument
     EINVAL = libc::EINVAL as int,
