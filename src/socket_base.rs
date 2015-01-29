@@ -11,9 +11,9 @@ use tcp_listener::TcpListener;
 
 use std::collections::HashMap;
 use std::sync::mpsc::Select;
-use std::io;
-use std::io::Listener;
-use std::io::net::ip::SocketAddr;
+use std::old_io;
+use std::old_io::Listener;
+use std::old_io::net::ip::SocketAddr;
 use std::sync::{Arc, RwLock};
 use std::sync::mpsc::{Receiver, Sender};
 
@@ -71,7 +71,7 @@ impl SocketBase {
             "tcp" => {
                 match from_str::<SocketAddr>(address) {
                     Some(addr) => {
-                        let listener = io::TcpListener::bind(
+                        let listener = old_io::TcpListener::bind(
                             format!("{}:{}", addr.ip, addr.port).as_slice());
                         let acceptor = try!(listener.listen().map_err(ZmqError::from_io_error));
                         TcpListener::spawn_new(acceptor, self.tx.clone(), self.options.clone());
