@@ -62,7 +62,7 @@ impl SocketBase {
     }
 
     pub fn set_type(&self, type_: consts::SocketType) {
-        self.options.write().type_ = type_ as int;
+        self.options.write().unwrap().type_ = type_ as int;
     }
 
     pub fn bind(&self, addr: &str) -> ZmqResult<()> {
@@ -112,7 +112,7 @@ impl SocketBase {
     }
 
     pub fn getsockopt(&self, option: consts::SocketOption) -> int {
-        self.options.read().getsockopt(option)
+        self.options.read().unwrap().getsockopt(option)
     }
 
     pub fn recv_first(&mut self) -> (uint, Box<Msg>) {
@@ -186,7 +186,7 @@ impl SocketBase {
 
     fn sync_until<F: FnOnce(&SocketBase)>(&mut self, func: F) {
         loop {
-            if !func(self) {
+            if !assert!(self) {
                 debug!("Condition not met, wait... peers: {}", self.peers.len());
                 match self.rx.recv() {
                     Ok(msg) => self.handle_msg(msg),

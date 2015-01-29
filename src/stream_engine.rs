@@ -78,7 +78,7 @@ impl StreamEngine {
         let mut signature = box vec!();
         signature.push(0xffu8);
         extensions::u64_to_be_bytes(
-            (self.options.read().identity_size + 1) as u64, 8, |v| signature.push_all(v));
+            (self.options.read().unwrap().identity_size + 1) as u64, 8, |v| signature.push_all(v));
         signature.push(0x7fu8);
         if bytes_tx.send(signature).is_err() {
             return Err(ZmqError::new(ErrorCode::EIOERROR, "Connection closed"));
@@ -170,11 +170,11 @@ impl StreamEngine {
                 type_sent = true;
                 match greeting_recv[10] {
                     ZMTP_1_0 | ZMTP_2_0 => {
-                        sender.send(box [self.options.read().type_ as u8].to_vec());
+                        sender.send(box [self.options.read().unwrap().type_ as u8].to_vec());
                     }
                     _ => {
                         //TODO: error or ZMTP 3.0
-                        sender.send(box [self.options.read().type_ as u8].to_vec());
+                        sender.send(box [self.options.read().unwrap().type_ as u8].to_vec());
                     }
                 }
             }
@@ -185,7 +185,7 @@ impl StreamEngine {
         } else if greeting_recv[REVISION_POS] == ZMTP_1_0 {
             return Err(ZmqError::new(ErrorCode::EPROTONOSUPPORT, "ZMTP 1.0 is not supported"));
         } else {
-            return Ok((V2Decoder::new(self.options.read().maxmsgsize), V2Encoder::new()));
+            return Ok((V2Decoder::new(self.options.read().unwrap().maxmsgsize), V2Encoder::new()));
         }
     }
 

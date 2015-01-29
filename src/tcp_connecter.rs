@@ -42,8 +42,8 @@ impl TcpConnecter {
                     try!(self.chan_to_socket.send(Err(ZmqError::from_io_error(e)))),
             }
 
-            let reconnect_ivl = self.options.read().reconnect_ivl;
-            let reconnect_ivl_max = self.options.read().reconnect_ivl_max;
+            let reconnect_ivl = self.options.read().unwrap().reconnect_ivl;
+            let reconnect_ivl_max = self.options.read().unwrap().reconnect_ivl_max;
 
             //  The new interval is the current interval + random value.
             let interval = self.current_reconnect_ivl + Duration::milliseconds(
@@ -64,7 +64,7 @@ impl TcpConnecter {
     pub fn spawn_new(addr: SocketAddr, chan: Sender<ZmqResult<SocketMessage>>,
                      options: Arc<RwLock<Options>>) {
         Thread::spawn(move || {
-            let reconnect_ivl = options.read().reconnect_ivl;
+            let reconnect_ivl = options.read().unwrap().reconnect_ivl;
             let mut connecter = TcpConnecter {
                 chan_to_socket: chan,
                 addr: addr,

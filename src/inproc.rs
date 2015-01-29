@@ -53,7 +53,7 @@ impl InprocManagerTask {
 
                     match self.inproc_connecters.entry(key) {
                         Entry::Vacant(entry) => {
-                            entry.set(vec!());
+                            entry.insert(vec!());
                         },
                         Entry::Occupied(entry) => {
                             entry.into_mut().push(tx);
