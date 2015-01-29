@@ -29,17 +29,17 @@ impl TcpConnecter {
         loop {
             match TcpStream::connect(format!("{}:{}", self.addr.ip, self.addr.port).as_slice()) {
                 Ok(stream) => {
-                    if self.chan_to_socket.send_opt(Ok(SocketMessage::Ping)).is_err() {
+                    if self.chan_to_socket.send(Ok(SocketMessage::Ping)).is_err() {
                         return Ok(());
                     }
 
                     let (tx, rx) = channel();
                     StreamEngine::spawn_new(
                         stream, self.options.clone(), self.chan_to_socket.clone(), Some(tx));
-                    let _ = rx.recv_opt();
+                    let _ = rx.recv();
                 }
                 Err(e) =>
-                    try!(self.chan_to_socket.send_opt(Err(ZmqError::from_io_error(e)))),
+                    try!(self.chan_to_socket.send(Err(ZmqError::from_io_error(e)))),
             }
 
             let reconnect_ivl = self.options.read().reconnect_ivl;

@@ -23,7 +23,7 @@ struct InprocManagerTask {
 impl InprocManagerTask {
     fn run(&mut self) {
         loop {
-            match self.chan.recv_opt() {
+            match self.chan.recv() {
                 Ok(InprocCommand::DoBind(key, tx)) => {
                     if self.inproc_binders.contains_key(&key) {
                         // TODO: return error

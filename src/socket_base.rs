@@ -16,6 +16,7 @@ use std::old_io::Listener;
 use std::old_io::net::ip::SocketAddr;
 use std::sync::{Arc, RwLock};
 use std::sync::mpsc::{Receiver, Sender};
+use std::str::FromStr;
 
 pub enum SocketMessage {
     Ping,
@@ -69,7 +70,7 @@ impl SocketBase {
 
         match protocol {
             "tcp" => {
-                match from_str::<SocketAddr>(address) {
+                match FromStr::from_str::<SocketAddr>(address) {
                     Some(addr) => {
                         let listener = old_io::TcpListener::bind(
                             format!("{}:{}", addr.ip, addr.port).as_slice());
@@ -93,7 +94,7 @@ impl SocketBase {
         let (protocol, address) = try!(parse_uri(addr));
         match protocol {
             "tcp" => {
-                match from_str::<SocketAddr>(address) {
+                match FromStr::from_str::<SocketAddr>(address) {
                     Some(addr) => {
                         TcpConnecter::spawn_new(addr, self.tx.clone(), self.options.clone());
                         Ok(())
@@ -139,7 +140,7 @@ impl SocketBase {
                 match mapping.remove(&hid) {
                     Some((None, _)) => continue,
                     Some((Some(mut handle), index)) => {
-                        match handle.recv_opt() {
+                        match handle.recv() {
                             Ok(msg) => {
                                 unsafe {
                                     handle.remove();
@@ -185,9 +186,9 @@ impl SocketBase {
 
     fn sync_until<F: FnOnce(&SocketBase)>(&mut self, func: F) {
         loop {
-            if !cond(self) {
+            if !func(self) {
                 debug!("Condition not met, wait... peers: {}", self.peers.len());
-                match self.rx.recv_opt() {
+                match self.rx.recv() {
                     Ok(msg) => self.handle_msg(msg),
                     Err(_) => panic!(),
                 }
